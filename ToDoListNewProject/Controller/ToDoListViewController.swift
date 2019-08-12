@@ -37,11 +37,9 @@ class ToDoListViewController: UITableViewController {
         item4.itemTitle = "Fifth Element"
         itemArray.append(item4)
 
-        
-
-        //        if let item = defaults.array(forKey: "ItemArray") as? [String] {
-//            itemArray = item
-       // }
+        if let item = defaults.array(forKey: "ItemArray") as? [itemDataModel] {
+            itemArray = item
+        }
         // Do any additional setup after loading the view.
     }
     //MARK: - Tableview Data Source
@@ -51,12 +49,17 @@ class ToDoListViewController: UITableViewController {
         let item = itemArray[indexPath.row]
         cell.textLabel?.text = item.itemTitle
         
-        if item.done == true {
-            cell.accessoryType = .checkmark
-        }
-        else {
-            cell.accessoryType = .none
-        }
+        //Ternary Operator
+       // cell.accessoryType = item.done == true ? .checkmark : .none
+        cell.accessoryType = item.done ? .checkmark : .none
+        
+        //Normal Conditions
+//        if item.done == true {
+//            cell.accessoryType = .checkmark
+//        }
+//        else {
+//            cell.accessoryType = .none
+//        }
         
         return cell
     }
