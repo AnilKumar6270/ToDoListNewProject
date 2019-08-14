@@ -12,34 +12,20 @@ class ToDoListViewController: UITableViewController {
     
     var itemArray = [itemDataModel]()
     
-    var defaults = UserDefaults.standard
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Item.plist")
+
     
     //MARK:- View Start
     override func viewDidLoad() {
         super.viewDidLoad()
-        let item = itemDataModel()
-        item.itemTitle = "First Element"
-        itemArray.append(item)
         
-        let item1 = itemDataModel()
-        item1.itemTitle = "Second Element"
-        itemArray.append(item1)
-
-        let item2 = itemDataModel()
-        item2.itemTitle = "Third Element"
-        itemArray.append(item2)
-
-        let item3 = itemDataModel()
-        item3.itemTitle = "Fourth Element"
-        itemArray.append(item3)
-
-        let item4 = itemDataModel()
-        item4.itemTitle = "Fifth Element"
-        itemArray.append(item4)
-
-        if let item = defaults.array(forKey: "ItemArray") as? [itemDataModel] {
-            itemArray = item
-        }
+        
+        loadItems()
+        
+        //This is for user defaults value storage
+//        if let item = defaults.array(forKey: "ItemArray") as? [itemDataModel] {
+//            itemArray = item
+//        }
         // Do any additional setup after loading the view.
     }
     //MARK: - Tableview Data Source
@@ -70,7 +56,7 @@ class ToDoListViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
-        self.tableView.reloadData()
+        saveFile()
     }
     //MARK: - Add New Item
     @IBAction func addNewItemButtonPresses(_ sender: UIBarButtonItem) {
@@ -80,8 +66,8 @@ class ToDoListViewController: UITableViewController {
             let newItem = itemDataModel()
             newItem.itemTitle = textFeild.text!
             self.itemArray.append(newItem)
-            self.defaults.set(self.itemArray, forKey: "ItemArray")
-            self.tableView.reloadData()
+            
+            self.saveFile()
         }
         alert.addTextField { (alertTextFeild) in
             alertTextFeild.placeholder = "Create new item"
@@ -91,6 +77,29 @@ class ToDoListViewController: UITableViewController {
         present(alert,animated: true,completion: nil)
     }
     
-    
+    func saveFile () {
+        let encoder = PropertyListEncoder()
+        do {
+            let data = try encoder.encode(self.itemArray)
+            try data.write(to: self.dataFilePath!)
+        }
+        catch {
+            print("error exicuted \(error)")
+        }
+        self.tableView.reloadData()
+    }
+    func loadItems () {
+       
+        if let data = try? Data(contentsOf: dataFilePath!) {
+            let decoder = PropertyListDecoder ()
+            do {
+                itemArray = try decoder.decode([itemDataModel].self, from: data)
+            }
+            catch {
+                print("exicute error \(error)")
+            }
+        }
+       
+    }
 }
 

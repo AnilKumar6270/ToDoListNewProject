@@ -7,8 +7,8 @@
 //
 
 import Foundation
-
-class itemDataModel {
+//Encodable ,Decodable
+class itemDataModel : Codable {
     var itemTitle : String = ""
     var done : Bool = false
 }
