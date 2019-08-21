@@ -1,52 +1,26 @@
-//
 //  ViewController.swift
 //  ToDoListNewProject
-//
 //  Created by Anil on 11/08/19.
 //  Copyright © 2019 ModeFin Server. All rights reserved.
-//
-
 import UIKit
-
+import CoreData
 class ToDoListViewController: UITableViewController {
-    
-    var itemArray = [itemDataModel]()
-    
-    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Item.plist")
-
-    
+    var itemArray = [Item]()
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     //MARK:- View Start
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        
+        print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
         loadItems()
-        
-        //This is for user defaults value storage
-//        if let item = defaults.array(forKey: "ItemArray") as? [itemDataModel] {
-//            itemArray = item
-//        }
-        // Do any additional setup after loading the view.
     }
+    
     //MARK: - Tableview Data Source
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoListCell", for: indexPath)
         
         let item = itemArray[indexPath.row]
-        cell.textLabel?.text = item.itemTitle
-        
-        //Ternary Operator
-       // cell.accessoryType = item.done == true ? .checkmark : .none
+        cell.textLabel?.text = item.item
         cell.accessoryType = item.done ? .checkmark : .none
-        
-        //Normal Conditions
-//        if item.done == true {
-//            cell.accessoryType = .checkmark
-//        }
-//        else {
-//            cell.accessoryType = .none
-//        }
-        
         return cell
     }
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -54,19 +28,24 @@ class ToDoListViewController: UITableViewController {
     }
     //MARK: - Table View Delegate
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
+        
+//        context.delete(itemArray[indexPath.row])
+//        itemArray.remove(at: indexPath.row)
+        
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
         saveFile()
+        tableView.deselectRow(at: indexPath, animated: true)
+
     }
     //MARK: - Add New Item
     @IBAction func addNewItemButtonPresses(_ sender: UIBarButtonItem) {
         var textFeild = UITextField()
         let alert = UIAlertController.init(title: "Add New TodoList Item", message: "", preferredStyle: .alert)
         let alertAction = UIAlertAction.init(title: "Add Item", style: .default) { (action) in
-            let newItem = itemDataModel()
-            newItem.itemTitle = textFeild.text!
+            let newItem = Item(context: self.context)
+            newItem.item = textFeild.text!
+            newItem.done = false
             self.itemArray.append(newItem)
-            
             self.saveFile()
         }
         alert.addTextField { (alertTextFeild) in
@@ -76,30 +55,25 @@ class ToDoListViewController: UITableViewController {
         alert .addAction(alertAction)
         present(alert,animated: true,completion: nil)
     }
-    
+    //MARK: - Save File
     func saveFile () {
-        let encoder = PropertyListEncoder()
         do {
-            let data = try encoder.encode(self.itemArray)
-            try data.write(to: self.dataFilePath!)
+            try self.context.save()
         }
         catch {
-            print("error exicuted \(error)")
+            print("error Saving \(error)")
         }
         self.tableView.reloadData()
     }
     func loadItems () {
-       
-        if let data = try? Data(contentsOf: dataFilePath!) {
-            let decoder = PropertyListDecoder ()
-            do {
-                itemArray = try decoder.decode([itemDataModel].self, from: data)
-            }
-            catch {
-                print("exicute error \(error)")
-            }
+        let request : NSFetchRequest<Item> = Item.fetchRequest()
+        
+        do {
+            itemArray = try context.fetch(request)
         }
-       
+        catch {
+            print("error fetching item from data model")
+        }
     }
 }
 
