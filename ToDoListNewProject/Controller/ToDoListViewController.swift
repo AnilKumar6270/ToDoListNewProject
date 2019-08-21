@@ -76,4 +76,9 @@ class ToDoListViewController: UITableViewController {
         }
     }
 }
+extension ToDoListViewController : UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        print(searchBar.text!)
+    }
+}
 
