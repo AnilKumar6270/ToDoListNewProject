@@ -29,13 +29,13 @@ class ToDoListViewController: UITableViewController {
     //MARK: - Table View Delegate
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-//        context.delete(itemArray[indexPath.row])
-//        itemArray.remove(at: indexPath.row)
+        //        context.delete(itemArray[indexPath.row])
+        //        itemArray.remove(at: indexPath.row)
         
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
         saveFile()
         tableView.deselectRow(at: indexPath, animated: true)
-
+        
     }
     //MARK: - Add New Item
     @IBAction func addNewItemButtonPresses(_ sender: UIBarButtonItem) {
@@ -65,20 +65,34 @@ class ToDoListViewController: UITableViewController {
         }
         self.tableView.reloadData()
     }
-    func loadItems () {
-        let request : NSFetchRequest<Item> = Item.fetchRequest()
-        
+    func loadItems (with request : NSFetchRequest<Item> = Item.fetchRequest()) {
         do {
             itemArray = try context.fetch(request)
         }
         catch {
             print("error fetching item from data model")
         }
+        tableView.reloadData()
     }
 }
 extension ToDoListViewController : UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        print(searchBar.text!)
+        let request : NSFetchRequest<Item> = Item.fetchRequest()
+        
+        request.predicate = NSPredicate(format: "item CONTAINS[cd] %@", searchBar.text!)
+        
+        
+        request.sortDescriptors = [NSSortDescriptor(key: "item", ascending: true)]
+        
+        loadItems(with: request)
+    }
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        print("cancel button clicked")
+    }
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchBar.text?.count == 0 {
+            loadItems()
+        }
     }
 }
 
