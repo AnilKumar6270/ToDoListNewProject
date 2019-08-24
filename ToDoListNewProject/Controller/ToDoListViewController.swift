@@ -7,11 +7,16 @@ import CoreData
 class ToDoListViewController: UITableViewController {
     var itemArray = [Item]()
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    
+    var selectedCategory : Category? {
+        didSet {
+            loadItems()
+        }
+    }
     //MARK:- View Start
     override func viewDidLoad() {
         super.viewDidLoad()
         print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
-        loadItems()
     }
     
     //MARK: - Tableview Data Source
@@ -45,6 +50,7 @@ class ToDoListViewController: UITableViewController {
             let newItem = Item(context: self.context)
             newItem.item = textFeild.text!
             newItem.done = false
+            newItem.parentCategory = self.selectedCategory
             self.itemArray.append(newItem)
             self.saveFile()
         }
@@ -91,7 +97,13 @@ extension ToDoListViewController : UISearchBarDelegate {
     }
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchBar.text?.count == 0 {
+            
             loadItems()
+    
+            DispatchQueue.main.async {
+                
+                searchBar.resignFirstResponder()
+            }
         }
     }
 }
