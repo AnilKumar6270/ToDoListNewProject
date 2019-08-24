@@ -29,9 +29,9 @@ class CategoryViewController: UITableViewController {
     }
     
     //Mark: - Tableview Delegate Method's
-
-    override func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         performSegue(withIdentifier: "goToItems", sender: self)
+
     }
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let destinationVC = segue.destination as! ToDoListViewController
@@ -42,7 +42,6 @@ class CategoryViewController: UITableViewController {
         }
         
     }
-
     //Mark: - Data Manipulation Method's
     func loadCategories () {
         let request : NSFetchRequest<Category> = Category.fetchRequest()
