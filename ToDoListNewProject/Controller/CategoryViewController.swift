@@ -28,10 +28,9 @@ class CategoryViewController: UITableViewController {
         return categories.count
     }
     
-    //Mark: - Tableview Delegate Method's
+    //MARK: - Tableview Delegate Method's
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         performSegue(withIdentifier: "goToItems", sender: self)
-
     }
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let destinationVC = segue.destination as! ToDoListViewController
@@ -42,7 +41,7 @@ class CategoryViewController: UITableViewController {
         }
         
     }
-    //Mark: - Data Manipulation Method's
+    //MARK: - Data Manipulation Method's
     func loadCategories () {
         let request : NSFetchRequest<Category> = Category.fetchRequest()
         do{
@@ -53,7 +52,7 @@ class CategoryViewController: UITableViewController {
         }
         
     }
-    //Mark: - Add new Item to Category
+    //MARK: - Add new Item to Category
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         var textField  = UITextField()
         let alert = UIAlertController.init(title: "Add New Category", message: "", preferredStyle: .alert)

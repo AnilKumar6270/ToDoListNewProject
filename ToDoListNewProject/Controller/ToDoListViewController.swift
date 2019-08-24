@@ -17,7 +17,6 @@ class ToDoListViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
-        loadItems()
     }
 
     //MARK: - Tableview Data Source
@@ -72,7 +71,17 @@ class ToDoListViewController: UITableViewController {
         }
         self.tableView.reloadData()
     }
-    func loadItems (with request : NSFetchRequest<Item> = Item.fetchRequest()) {
+    func loadItems (with request : NSFetchRequest<Item> = Item.fetchRequest() , predicate : NSPredicate? = nil) {
+        
+        let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!)
+        if let additionalPredicate = predicate {
+            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate,additionalPredicate])
+        }
+        else {
+            request.predicate = categoryPredicate
+        }
+//        let compoundPredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate,predicate])
+//        request.predicate = compoundPredicate
         do {
             itemArray = try context.fetch(request)
         }
@@ -86,12 +95,11 @@ extension ToDoListViewController : UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         let request : NSFetchRequest<Item> = Item.fetchRequest()
         
-        request.predicate = NSPredicate(format: "item CONTAINS[cd] %@", searchBar.text!)
-        
+        let predicate =  NSPredicate(format: "item CONTAINS[cd] %@", searchBar.text!)
         
         request.sortDescriptors = [NSSortDescriptor(key: "item", ascending: true)]
         
-        loadItems(with: request)
+        loadItems(with: request,predicate: predicate)
     }
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         print("cancel button clicked")
